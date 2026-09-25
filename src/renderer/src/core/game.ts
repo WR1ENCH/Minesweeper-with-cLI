@@ -92,13 +92,14 @@ export function chord(state: GameState, r: number, c: number): void {
   const flagCount = ns.filter(([nr, nc]) => state.cells[nr][nc].state === 'flagged').length
   if (flagCount !== cell.adjacent) return
 
-  // 先记下要开的格，逐个翻（openCell 内部踩雷会立即置 lost 并 return）
+  // 逐个翻：openCell 内部踩雷会立即置 lost，此时中止后续翻格
   for (const [nr, nc] of ns) {
-    if (state.status === 'lost') return
     const target = state.cells[nr][nc]
-    if (target.state === 'hidden') openCell(state, nr, nc)
+    if (target.state !== 'hidden') continue
+    openCell(state, nr, nc)
+    if (state.cells[nr][nc].mine) return
   }
-  if (state.status === 'playing') checkWin(state)
+  checkWin(state)
 }
 
 export function getElapsedSeconds(state: GameState): number {

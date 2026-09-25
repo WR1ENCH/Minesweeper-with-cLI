@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { DIFFICULTIES } from '../difficulty'
-import { createGame, placeMines } from '../board'
+import { createGame } from '../board'
 import { chord, getElapsedSeconds, revealCell, toggleFlag } from '../game'
 import type { GameState } from '../types'
 

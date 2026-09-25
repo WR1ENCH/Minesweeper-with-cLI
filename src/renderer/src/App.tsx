@@ -3,27 +3,33 @@ import type { JSX } from 'react'
 import { createGame } from './core/board'
 import { chord, getElapsedSeconds, revealCell, toggleFlag } from './core/game'
 import { DIFFICULTIES } from './core/difficulty'
-import { loadRecords, saveRecord, type Records } from './core/records'
-import type { Difficulty, GameState } from './core/types'
+import { loadRecords, saveCustomRecord, saveRecord, type Records } from './core/records'
+import type { BoardConfig, Difficulty, GameState } from './core/types'
 import Board from './components/Board'
 import HeaderBar from './components/HeaderBar'
 import DifficultyPicker from './components/DifficultyPicker'
 import ThemeSkinPicker from './components/ThemeSkinPicker'
 import { applySkin, applyTheme } from './theme'
 
-function newGame(difficulty: Difficulty): GameState {
-  return createGame(DIFFICULTIES[difficulty], difficulty)
-}
-
 export default function App(): JSX.Element {
   const [records, setRecords] = useState<Records>(() => loadRecords())
   const [difficulty, setDifficulty] = useState<Difficulty>('beginner')
-  const [game, setGame] = useState<GameState>(() => newGame('beginner'))
+  const [customConfig, setCustomConfig] = useState<BoardConfig>({ rows: 9, cols: 9, mines: 10 })
+  const [game, setGame] = useState<GameState>(() => createGame(DIFFICULTIES.beginner, 'beginner'))
 
-  const restart = useCallback((d: Difficulty = difficulty): void => {
-    setDifficulty(d)
-    setGame(newGame(d))
-  }, [difficulty])
+  const restart = useCallback(
+    (d: Difficulty = difficulty): void => {
+      setDifficulty(d)
+      setGame(createGame(d === 'custom' ? customConfig : DIFFICULTIES[d], d))
+    },
+    [difficulty, customConfig]
+  )
+
+  const startCustom = useCallback((config: BoardConfig): void => {
+    setCustomConfig(config)
+    setDifficulty('custom')
+    setGame(createGame(config, 'custom'))
+  }, [])
 
   // 菜单消息（main 进程的通道）
   useEffect(() => {
@@ -56,7 +62,11 @@ export default function App(): JSX.Element {
   useEffect(() => {
     if (game.status !== 'won') return
     const seconds = getElapsedSeconds(game)
-    setRecords(saveRecord(game.difficulty, seconds))
+    setRecords(
+      game.difficulty === 'custom'
+        ? saveCustomRecord(game.config, seconds)
+        : saveRecord(game.difficulty, seconds)
+    )
   }, [game.status])
 
   useEffect(() => {
@@ -67,26 +77,33 @@ export default function App(): JSX.Element {
   return (
     <div className="app">
       <HeaderBar game={game} records={records} onRestart={() => restart(difficulty)} />
-      <DifficultyPicker current={difficulty} onPick={restart} />
-      <ThemeSkinPicker />
-      <Board
-        game={game}
-        onReveal={(r, c) => {
-          const next = structuredClone(game)
-          revealCell(next, r, c)
-          setGame(next)
-        }}
-        onFlag={(r, c) => {
-          const next = structuredClone(game)
-          toggleFlag(next, r, c)
-          setGame(next)
-        }}
-        onChord={(r, c) => {
-          const next = structuredClone(game)
-          chord(next, r, c)
-          setGame(next)
-        }}
+      <DifficultyPicker
+        current={difficulty}
+        customConfig={customConfig}
+        onPick={restart}
+        onStartCustom={startCustom}
       />
+      <ThemeSkinPicker />
+      <div className="board-scroll">
+        <Board
+          game={game}
+          onReveal={(r, c) => {
+            const next = structuredClone(game)
+            revealCell(next, r, c)
+            setGame(next)
+          }}
+          onFlag={(r, c) => {
+            const next = structuredClone(game)
+            toggleFlag(next, r, c)
+            setGame(next)
+          }}
+          onChord={(r, c) => {
+            const next = structuredClone(game)
+            chord(next, r, c)
+            setGame(next)
+          }}
+        />
+      </div>
     </div>
   )
 }

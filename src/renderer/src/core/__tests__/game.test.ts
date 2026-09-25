@@ -156,3 +156,16 @@ describe('getElapsedSeconds', () => {
     expect(t1).toBe(t2)
   })
 })
+
+describe('custom max-density board end-to-end', () => {
+  it('first center reveal wins instantly (safe zone is all non-mine cells)', () => {
+    const s = createGame({ rows: 50, cols: 50, mines: 2491 }, 'custom')
+    revealCell(s, 25, 25)
+    expect(s.status).toBe('won')
+    for (let r = 24; r <= 26; r++)
+      for (let c = 24; c <= 26; c++) {
+        expect(s.cells[r][c].state).toBe('revealed')
+        expect(s.cells[r][c].mine).toBe(false)
+      }
+  })
+})

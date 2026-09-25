@@ -1,4 +1,5 @@
-export type Difficulty = 'beginner' | 'intermediate' | 'expert'
+export type PresetDifficulty = 'beginner' | 'intermediate' | 'expert'
+export type Difficulty = PresetDifficulty | 'custom'
 
 export interface BoardConfig {
   rows: number

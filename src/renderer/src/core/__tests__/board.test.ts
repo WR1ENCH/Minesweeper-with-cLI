@@ -51,3 +51,36 @@ describe('placeMines', () => {
       }
   })
 })
+
+describe('createGame with hostile custom config', () => {
+  it('normalizes before building the board', () => {
+    const s = createGame({ rows: 999, cols: -3, mines: 1e9 }, 'custom')
+    expect(s.config).toEqual({ rows: 50, cols: 5, mines: 241 })
+    expect(s.cells).toHaveLength(50)
+    s.cells.forEach((row) => expect(row).toHaveLength(5))
+  })
+})
+
+describe('placeMines at max density (mines = rows*cols − 9)', () => {
+  it('places exactly 2491 mines with a safe interior first click', () => {
+    const s = createGame({ rows: 50, cols: 50, mines: 2491 }, 'custom')
+    placeMines(s, 25, 25) // 不抛异常即部分洗牌未越界
+    let mineCount = 0
+    for (const row of s.cells) for (const c of row) if (c.mine) mineCount++
+    expect(mineCount).toBe(2491)
+    for (let r = 24; r <= 26; r++)
+      for (let c = 24; c <= 26; c++) expect(s.cells[r][c].mine).toBe(false)
+  })
+
+  it('places exactly 2491 mines with a safe corner first click', () => {
+    const t = createGame({ rows: 50, cols: 50, mines: 2491 }, 'custom')
+    placeMines(t, 0, 0)
+    let mineCount = 0
+    for (const row of t.cells) for (const c of row) if (c.mine) mineCount++
+    expect(mineCount).toBe(2491)
+    expect(t.cells[0][0].mine).toBe(false)
+    expect(t.cells[0][1].mine).toBe(false)
+    expect(t.cells[1][0].mine).toBe(false)
+    expect(t.cells[1][1].mine).toBe(false)
+  })
+})

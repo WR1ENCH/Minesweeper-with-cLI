@@ -5,7 +5,7 @@ import type { GameState } from '../core/types'
 
 const MINE_EMOJI = '💣'
 
-import type { Records } from '../core/records'
+import { customRecordKey, type Records } from '../core/records'
 
 interface HeaderBarProps {
   game: GameState
@@ -33,7 +33,14 @@ export default function HeaderBar({ game, records, onRestart }: HeaderBarProps):
       <div className="counter">
         {String(Math.min(999, getElapsedSeconds(game))).padStart(3, '0')}
       </div>
-      <div className="best">最佳: {records?.[game.difficulty] ?? '--'}</div>
+      <div className="best">
+        最佳:{' '}
+        {records == null
+          ? '--'
+          : game.difficulty === 'custom'
+            ? (records.custom[customRecordKey(game.config)] ?? '--')
+            : (records[game.difficulty] ?? '--')}
+      </div>
     </header>
   )
 }

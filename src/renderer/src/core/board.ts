@@ -1,8 +1,12 @@
+import { resolveCustomConfig } from './difficulty'
 import type { BoardConfig, Cell, Difficulty, GameState } from './types'
 
 export function createGame(config: BoardConfig, difficulty: Difficulty): GameState {
-  const cells: Cell[][] = Array.from({ length: config.rows }, () =>
-    Array.from({ length: config.cols }, () => ({
+  // 唯一咽喉点：任何来源（UI/菜单/测试）的配置进入 GameState 前先归一化，
+  // 保证 mines ≤ rows*cols − SAFE_ZONE 这一可布雷不变量结构性成立。
+  const cfg = resolveCustomConfig(config)
+  const cells: Cell[][] = Array.from({ length: cfg.rows }, () =>
+    Array.from({ length: cfg.cols }, () => ({
       mine: false,
       adjacent: 0 as Cell['adjacent'],
       state: 'hidden' as const
@@ -10,7 +14,7 @@ export function createGame(config: BoardConfig, difficulty: Difficulty): GameSta
   )
   return {
     difficulty,
-    config,
+    config: cfg,
     cells,
     status: 'ready',
     startTime: null,
@@ -19,7 +23,14 @@ export function createGame(config: BoardConfig, difficulty: Difficulty): GameSta
   }
 }
 
-/** 首次翻格时布雷：safeR/safeC 及其 8 邻域保证无雷（首点保护）。 */
+/**
+ * 首次翻格时布雷：safeR/safeC 及其 8 邻域保证无雷（首点保护）。
+ *
+ * 可布雷性不变量（由 createGame 的 resolveCustomConfig 结构性保证）：
+ *   mines ≤ rows·cols − 9；首点安全区 safeCount ≤ 9（角落 4 / 边 6 / 内部 9）
+ *   ⇒ 可布雷位 rows·cols − safeCount ≥ rows·cols − 9 ≥ mines
+ *   ⇒ indices.length ≥ mines，部分洗牌 indices[i] 永不越界。
+ */
 export function placeMines(state: GameState, safeR: number, safeC: number): void {
   const { rows, cols, mines } = state.config
   const safe = new Set<number>()

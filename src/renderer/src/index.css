@@ -133,6 +133,9 @@ body {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
+  /* max-content 让棋盘按轨道收缩：放得下时 auto 边距居中；超宽时边距归 0 左对齐，父级 .board-scroll 滚动 */
+  width: max-content;
+  margin: 0 auto;
 }
 
 .cell {
@@ -219,4 +222,43 @@ body {
 :root[data-skin='classic'] .diff-btn:hover,
 :root[data-skin='classic'] .pick-btn:hover {
   background: #c0c0c0;
+}
+
+/* 自定义难度表单 */
+.custom-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.custom-form label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.custom-form input[type='number'] {
+  width: 64px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 14px;
+}
+
+/* 棋盘横向溢出走容器滚动条，避免 align-items:center 把左侧裁掉 */
+.board-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* 经典皮肤输入框随肤 */
+:root[data-skin='classic'] .custom-form input[type='number'] {
+  border-radius: 0;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #fff;
+  color: #000;
 }

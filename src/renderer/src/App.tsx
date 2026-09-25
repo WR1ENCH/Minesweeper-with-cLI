@@ -8,6 +8,8 @@ import type { Difficulty, GameState } from './core/types'
 import Board from './components/Board'
 import HeaderBar from './components/HeaderBar'
 import DifficultyPicker from './components/DifficultyPicker'
+import ThemeSkinPicker from './components/ThemeSkinPicker'
+import { applySkin, applyTheme } from './theme'
 
 function newGame(difficulty: Difficulty): GameState {
   return createGame(DIFFICULTIES[difficulty], difficulty)
@@ -25,16 +27,20 @@ export default function App(): JSX.Element {
 
   // 菜单消息（main 进程的通道）
   useEffect(() => {
-    const onNewGame = (): void => restart(difficulty)
     const disposers: Array<() => void> = []
     const on = (channel: string, cb: () => void): void => {
       window.electron.ipcRenderer.on(channel, cb)
       disposers.push(() => window.electron.ipcRenderer.removeListener(channel, cb))
     }
-    on('menu:new-game', onNewGame)
+    on('menu:new-game', () => restart(difficulty))
     on('menu:difficulty-beginner', () => restart('beginner'))
     on('menu:difficulty-intermediate', () => restart('intermediate'))
     on('menu:difficulty-expert', () => restart('expert'))
+    on('menu:theme-light', () => applyTheme('light'))
+    on('menu:theme-dark', () => applyTheme('dark'))
+    on('menu:theme-system', () => applyTheme('system'))
+    on('menu:skin-classic', () => applySkin('classic'))
+    on('menu:skin-modern', () => applySkin('modern'))
     return () => disposers.forEach((d) => d())
   }, [restart, difficulty])
 
@@ -62,6 +68,7 @@ export default function App(): JSX.Element {
     <div className="app">
       <HeaderBar game={game} records={records} onRestart={() => restart(difficulty)} />
       <DifficultyPicker current={difficulty} onPick={restart} />
+      <ThemeSkinPicker />
       <Board
         game={game}
         onReveal={(r, c) => {

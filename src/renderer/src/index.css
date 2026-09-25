@@ -1,18 +1,222 @@
 :root {
+  --bg: #f5f6fa;
+  --panel: #ffffff;
+  --cell-hidden: #dcdfe6;
+  --cell-hidden-hover: #c8ccd4;
+  --cell-revealed: #f0f1f5;
+  --border: #d0d3da;
+  --text: #2c3e50;
   --cell-size: 32px;
+  /* n1-n8 数字颜色 */
+  --n1: #1976d2; --n2: #388e3c; --n3: #d32f2f; --n4: #7b1fa2;
+  --n5: #c2185b; --n6: #0097a7; --n7: #455a64; --n8: #795548;
 }
-/* filled in Task 8 */
+
+:root[data-theme='dark'] {
+  --bg: #1e1e1e; --panel: #2a2a2a; --cell-hidden: #3a3f4b;
+  --cell-hidden-hover: #4a5160; --cell-revealed: #26292f;
+  --border: #17181c; --text: #e0e0e0;
+}
+
+:root[data-skin='classic'] {
+  --cell-hidden: #c0c0c0; --cell-revealed: #c0c0c0;
+  --border: #808080; --text: #000;
+  --n1: #0000ff; --n2: #008000; --n3: #ff0000; --n4: #000080;
+  --n5: #800000; --n6: #008080; --n7: #000000; --n8: #808080;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+}
+
 .app {
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
+  padding: 16px;
+  gap: 12px;
 }
+
+/* 头部：计数 / 表情 / 计时 / 最佳 */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.counter,
+.best {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 18px;
+  min-width: 72px;
+  text-align: center;
+}
+
+.best {
+  font-size: 14px;
+  min-width: 84px;
+  opacity: 0.85;
+}
+
+.face {
+  font-size: 26px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--cell-hidden);
+  cursor: pointer;
+}
+
+.face:hover {
+  background: var(--cell-hidden-hover);
+}
+
+/* 难度选择 */
+.difficulty-picker {
+  display: flex;
+  gap: 8px;
+}
+
+.diff-btn,
+.pick-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.diff-btn:hover,
+.pick-btn:hover {
+  background: var(--cell-hidden-hover);
+}
+
+.diff-btn.active,
+.pick-btn.active {
+  background: var(--cell-hidden);
+  font-weight: 700;
+}
+
+/* 主题/皮肤选择 */
+.theme-skin-picker {
+  display: flex;
+  gap: 16px;
+}
+
+.theme-picker,
+.skin-picker {
+  display: flex;
+  gap: 6px;
+}
+
+/* 棋盘 */
 .board {
   display: grid;
   gap: 2px;
+  padding: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
+
 .cell {
-  width: var(--cell-size, 32px);
-  height: var(--cell-size, 32px);
+  width: var(--cell-size);
+  height: var(--cell-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Consolas', 'Courier New', monospace;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--cell-hidden);
+  color: var(--text);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.cell.hidden-cell:hover {
+  background: var(--cell-hidden-hover);
+}
+
+.cell.revealed {
+  background: var(--cell-revealed);
+  border-color: var(--border);
+  cursor: default;
+}
+
+.cell.n1 { color: var(--n1); }
+.cell.n2 { color: var(--n2); }
+.cell.n3 { color: var(--n3); }
+.cell.n4 { color: var(--n4); }
+.cell.n5 { color: var(--n5); }
+.cell.n6 { color: var(--n6); }
+.cell.n7 { color: var(--n7); }
+.cell.n8 { color: var(--n8); }
+
+.cell.exploded {
+  background: #e53935;
+  color: #fff;
+}
+
+/* Win95 经典皮肤：浮雕边框 */
+:root[data-skin='classic'] .cell {
+  border: 2px solid;
+  border-color: #fff #808080 #808080 #fff;
+  border-radius: 0;
+}
+
+:root[data-skin='classic'] .cell.revealed {
+  border: 1px solid #808080;
+  border-width: 0 0 1px 1px;
+}
+
+:root[data-skin='classic'] .cell.hidden-cell:hover {
+  background: #c0c0c0;
+}
+
+:root[data-skin='classic'] .cell.exploded {
+  background: #ff0000;
+}
+
+:root[data-skin='classic'] .header,
+:root[data-skin='classic'] .board {
+  border-radius: 0;
+  border: 2px solid;
+  border-color: #fff #808080 #808080 #fff;
+  background: #c0c0c0;
+}
+
+:root[data-skin='classic'] .face,
+:root[data-skin='classic'] .diff-btn,
+:root[data-skin='classic'] .pick-btn {
+  border-radius: 0;
+  border: 2px solid;
+  border-color: #fff #808080 #808080 #fff;
+  background: #c0c0c0;
+  color: #000;
+}
+
+:root[data-skin='classic'] .face:hover,
+:root[data-skin='classic'] .diff-btn:hover,
+:root[data-skin='classic'] .pick-btn:hover {
+  background: #c0c0c0;
 }

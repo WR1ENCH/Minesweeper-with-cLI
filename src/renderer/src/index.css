@@ -1,3 +1,6 @@
+:root {
+  --cell-size: 32px;
+}
 /* filled in Task 8 */
 .app {
   display: flex;

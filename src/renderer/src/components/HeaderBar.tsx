@@ -4,14 +4,16 @@ import { getElapsedSeconds } from '../core/game'
 import type { GameState } from '../core/types'
 
 const MINE_EMOJI = '💣'
-const FLAG_EMOJI = '🚩'
+
+import type { Records } from '../core/records'
 
 interface HeaderBarProps {
   game: GameState
+  records?: Records
   onRestart: () => void
 }
 
-export default function HeaderBar({ game, onRestart }: HeaderBarProps): JSX.Element {
+export default function HeaderBar({ game, records, onRestart }: HeaderBarProps): JSX.Element {
   const [, setTick] = useState(0)
   useEffect(() => {
     if (game.status !== 'playing') return
@@ -29,8 +31,9 @@ export default function HeaderBar({ game, onRestart }: HeaderBarProps): JSX.Elem
         {statusIcon}
       </button>
       <div className="counter">
-        {FLAG_EMOJI && ''}{String(Math.min(999, getElapsedSeconds(game))).padStart(3, '0')}
+        {String(Math.min(999, getElapsedSeconds(game))).padStart(3, '0')}
       </div>
+      <div className="best">最佳: {records?.[game.difficulty] ?? '--'}</div>
     </header>
   )
 }

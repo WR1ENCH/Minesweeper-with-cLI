@@ -3,6 +3,7 @@ import type { JSX } from 'react'
 import { createGame } from './core/board'
 import { chord, getElapsedSeconds, revealCell, toggleFlag } from './core/game'
 import { DIFFICULTIES } from './core/difficulty'
+import { loadRecords, saveRecord, type Records } from './core/records'
 import type { Difficulty, GameState } from './core/types'
 import Board from './components/Board'
 import HeaderBar from './components/HeaderBar'
@@ -13,6 +14,7 @@ function newGame(difficulty: Difficulty): GameState {
 }
 
 export default function App(): JSX.Element {
+  const [records, setRecords] = useState<Records>(() => loadRecords())
   const [difficulty, setDifficulty] = useState<Difficulty>('beginner')
   const [game, setGame] = useState<GameState>(() => newGame('beginner'))
 
@@ -46,13 +48,19 @@ export default function App(): JSX.Element {
   }, [game])
 
   useEffect(() => {
+    if (game.status !== 'won') return
+    const seconds = getElapsedSeconds(game)
+    setRecords(saveRecord(game.difficulty, seconds))
+  }, [game.status])
+
+  useEffect(() => {
     if (game.status === 'lost') window.electron.ipcRenderer.send('game:over')
     if (game.status === 'won') window.electron.ipcRenderer.send('game:win')
   }, [game.status])
 
   return (
     <div className="app">
-      <HeaderBar game={game} onRestart={() => restart(difficulty)} />
+      <HeaderBar game={game} records={records} onRestart={() => restart(difficulty)} />
       <DifficultyPicker current={difficulty} onPick={restart} />
       <Board
         game={game}
